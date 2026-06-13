@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SahilCodeLab | Client Reviews</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Favicon update for browser tab -->
+    <link rel="icon" type="image/x-icon" href="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico">
+    <style>
+        :root {
+            --brand-green: #8add4a; 
+            --bg-dark: #0a0a0a;
+            --card-dark: #141414;
+            --border-dark: #262626;
+        }
+        body { 
+            background-color: var(--bg-dark); 
+            color: #ffffff; 
+            font-family: 'Inter', sans-serif; 
+            min-height: 100vh; 
+        }
+        
+        /* Sleek Card Design */
+        .premium-card { 
+            background-color: var(--card-dark); 
+            border: 1px solid var(--border-dark); 
+            border-radius: 12px; 
+            transition: all 0.3s ease; 
+        }
+        .premium-card:hover {
+            border-color: var(--brand-green);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px -10px rgba(138, 221, 74, 0.15);
+        }
+
+        /* High Contrast Brand Button */
+        .btn-brand { 
+            background-color: var(--brand-green); 
+            color: #000000;
+            transition: all 0.2s ease;
+        }
+        .btn-brand:hover {
+            background-color: #7bc83f;
+            transform: scale(1.02);
+        }
+        .btn-brand:active {
+            transform: scale(0.98);
+        }
+
+        /* Smooth Hide Animation */
+        .hide-card { 
+            opacity: 0; 
+            transform: scale(0.95); 
+            max-height: 0; 
+            padding: 0 !important; 
+            margin: 0 !important; 
+            overflow: hidden; 
+            border: none; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid var(--border-dark);
+            border-top: 3px solid var(--brand-green);
+            border-radius: 50%;
+            width: 40px; height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="flex flex-col items-center py-16 px-5 sm:px-8">
+
+    <!-- Brand Header -->
+    <div class="text-center mb-14 max-w-2xl w-full flex flex-col items-center">
+        <!-- Original Logo Integration -->
+        <div class="flex items-center justify-center gap-3 mb-6">
+            <img src="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico" alt="SahilCodeLab Logo" class="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(138,221,74,0.4)]">
+            <span class="text-3xl font-bold tracking-tight">SahilCodeLab</span>
+        </div>
+        
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
+            Code. Build. <span class="text-[#8add4a]">Review.</span>
+        </h1>
+        <p class="text-gray-400 text-sm md:text-base max-w-lg leading-relaxed">
+            Pick a template below. Clicking 'Copy' will automatically save the text and take you directly to Google to drop your rating!
+        </p>
+    </div>
+
+    <!-- Status Messages -->
+    <div id="loading" class="flex flex-col items-center justify-center space-y-4 mb-8">
+        <div class="loader"></div>
+        <p class="text-[#8add4a] font-semibold tracking-wide text-sm animate-pulse">Initializing templates...</p>
+    </div>
+
+    <!-- Dynamic Reviews Container -->
+    <div id="reviews-container" class="w-full max-w-3xl space-y-4"></div>
+
+    <script>
+        // Aapki Google Sheet API
+        const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbyxB5LUGxnn2i7E4ElZUrEPkxu0CnkvdW02UXPXHn273QkcRgxFx0Ft-MmmFIGvmpUYQg/exec";
+        const googleReviewLink = "https://www.google.com/search?q=sahilcodelab#lrd=0x21620bfdf86287bd:0xa6015bcc8e41aaea,3,,,,";
+
+        const container = document.getElementById('reviews-container');
+        const loading = document.getElementById('loading');
+
+        async function fetchReviews() {
+            try {
+                const response = await fetch(GOOGLE_SHEET_API + "?action=getReviews");
+                const reviews = await response.json();
+                
+                loading.style.display = 'none';
+
+                if (reviews.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center premium-card p-12 border border-[#262626]">
+                            <p class="text-gray-300 font-medium text-lg mb-2">All templates have been used! 🚀</p>
+                            <p class="text-sm text-gray-500">Thank you for helping SahilCodeLab grow.</p>
+                        </div>`;
+                    return;
+                }
+
+                reviews.forEach(rev => {
+                    const card = document.createElement('div');
+                    card.className = "premium-card p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6";
+                    card.id = `card-${rev.row}`;
+                    
+                    card.innerHTML = `
+                        <div class="flex-grow">
+                            <div class="w-8 h-1 bg-[#8add4a] rounded-full mb-4 opacity-50"></div>
+                            <p id="text-${rev.row}" class="text-gray-300 text-sm leading-relaxed tracking-wide">"${rev.text}"</p>
+                        </div>
+                        <button id="btn-${rev.row}" onclick="handleCopyAndHide(${rev.row})" class="btn-brand px-7 py-3 rounded-lg font-bold text-sm whitespace-nowrap self-end sm:self-center w-full sm:w-auto shadow-md">
+                            Copy & Rate
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                loading.innerHTML = `<p class="text-red-400 bg-red-900/20 border border-red-500/20 px-6 py-3 rounded-lg font-medium text-sm">System error connecting to database. Please refresh.</p>`;
+            }
+        }
+
+        async function handleCopyAndHide(rowNumber) {
+            const btn = document.getElementById(`btn-${rowNumber}`);
+            const card = document.getElementById(`card-${rowNumber}`);
+            const textToCopy = document.getElementById(`text-${rowNumber}`).innerText.replace(/"/g, '').trim();
+
+            const executeCopy = () => {
+                const tempArea = document.createElement("textarea");
+                tempArea.value = textToCopy;
+                document.body.appendChild(tempArea);
+                tempArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempArea);
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy).catch(executeCopy);
+            } else {
+                executeCopy();
+            }
+
+            // Button UX Update
+            btn.innerHTML = `<svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
+            btn.classList.add("opacity-70", "cursor-wait");
+            btn.disabled = true;
+
+            try {
+                await fetch(GOOGLE_SHEET_API + "?action=markUsed&row=" + rowNumber);
+
+                card.classList.add('hide-card');
+                setTimeout(() => card.style.display = 'none', 400);
+
+                setTimeout(() => {
+                    window.open(googleReviewLink, '_blank');
+                }, 700);
+
+            } catch (error) {
+                window.open(googleReviewLink, '_blank');
+                card.style.display = 'none';
+            }
+        }
+
+        window.onload = fetchReviews;
+    </script>
+</body>
+</html>
