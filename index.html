@@ -20,7 +20,6 @@
             font-family: 'Inter', sans-serif; 
             min-height: 100vh; 
         }
-        
         .premium-card { 
             background-color: var(--card-dark); 
             border: 1px solid var(--border-dark); 
@@ -32,7 +31,6 @@
             transform: translateY(-4px);
             box-shadow: 0 10px 30px -10px rgba(138, 221, 74, 0.15);
         }
-
         .btn-brand { 
             background-color: var(--brand-green); 
             color: #000000;
@@ -42,10 +40,6 @@
             background-color: #7bc83f;
             transform: scale(1.02);
         }
-        .btn-brand:active {
-            transform: scale(0.98);
-        }
-
         .hide-card { 
             opacity: 0; 
             transform: scale(0.95); 
@@ -56,7 +50,6 @@
             border: none; 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
         .loader {
             border: 3px solid var(--border-dark);
             border-top: 3px solid var(--brand-green);
@@ -69,7 +62,6 @@
 </head>
 <body class="flex flex-col items-center py-16 px-5 sm:px-8">
 
-    <!-- Gender Selection Screen -->
     <div id="gender-screen" class="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-center p-5">
         <div class="flex items-center justify-center gap-3 mb-6">
             <img src="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico" alt="SahilCodeLab Logo" class="w-10 h-10 object-contain">
@@ -90,9 +82,7 @@
         </div>
     </div>
 
-    <!-- Main Content (Hidden Initially) -->
     <div id="main-content" class="w-full max-w-3xl flex flex-col items-center hidden">
-        <!-- Brand Header -->
         <div class="text-center mb-14 max-w-2xl w-full flex flex-col items-center">
             <div class="flex items-center justify-center gap-3 mb-6">
                 <img src="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico" alt="SahilCodeLab Logo" class="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(138,221,74,0.4)]">
@@ -107,19 +97,17 @@
             </p>
         </div>
 
-        <!-- Status Messages -->
         <div id="loading" class="flex flex-col items-center justify-center space-y-4 mb-8">
             <div class="loader"></div>
             <p class="text-[#8add4a] font-semibold tracking-wide text-sm animate-pulse">Initializing templates...</p>
         </div>
 
-        <!-- Dynamic Reviews Container -->
         <div id="reviews-container" class="w-full space-y-4"></div>
     </div>
 
     <script>
-        // Connected to your Google Apps Script URL
-        const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbyxB5LUGxnn2i7E4ElZUrEPkxu0CnkvdW02UXPXHn273QkcRgxFx0Ft-MmmFIGvmpUYQg/exec";
+        // Updated with your new deployment ID
+        const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbzWK67kihzoE9pkRHN2mEzatPL_26F5fMUY4n16Loi9yN6GG8RsN22RyNK84T3zhL05jA/exec";
         const googleReviewLink = "https://www.google.com/search?q=sahilcodelab#lrd=0x21620bfdf86287bd:0xa6015bcc8e41aaea,3,,,,";
 
         const container = document.getElementById('reviews-container');
@@ -127,15 +115,23 @@
         const genderScreen = document.getElementById('gender-screen');
         const mainContent = document.getElementById('main-content');
 
-        // Runs when user selects a gender
+        window.addEventListener('DOMContentLoaded', () => {
+            genderScreen.classList.remove('hidden');
+            mainContent.classList.add('hidden');
+        });
+
         function selectGender(gender) {
-            genderScreen.classList.add('hidden'); 
-            mainContent.classList.remove('hidden'); 
+            genderScreen.style.display = 'none';
+            mainContent.classList.remove('hidden');
             fetchReviews(gender); 
         }
 
         async function fetchReviews(gender) {
             try {
+                // Clearing previous templates before loading new ones
+                container.innerHTML = '';
+                loading.style.display = 'flex';
+
                 const response = await fetch(`${GOOGLE_SHEET_API}?action=getReviews&gender=${gender}`);
                 const reviews = await response.json();
                 
@@ -167,7 +163,8 @@
                     container.appendChild(card);
                 });
             } catch (error) {
-                loading.innerHTML = `<p class="text-red-400 bg-red-900/20 border border-red-500/20 px-6 py-3 rounded-lg font-medium text-sm">System error connecting to database. Please refresh.</p>`;
+                loading.style.display = 'none';
+                container.innerHTML = `<p class="text-red-400 text-center bg-red-900/20 border border-red-500/20 px-6 py-3 rounded-lg font-medium text-sm®">System error connecting to database. Please refresh.</p>`;
             }
         }
 
@@ -191,20 +188,14 @@
                 executeCopy();
             }
 
-            btn.innerHTML = `<svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
-            btn.classList.add("opacity-70", "cursor-wait");
+            btn.innerHTML = `Processing...`;
             btn.disabled = true;
 
             try {
                 await fetch(GOOGLE_SHEET_API + "?action=markUsed&row=" + rowNumber);
-
                 card.classList.add('hide-card');
                 setTimeout(() => card.style.display = 'none', 400);
-
-                setTimeout(() => {
-                    window.open(googleReviewLink, '_blank');
-                }, 700);
-
+                setTimeout(() => { window.open(googleReviewLink, '_blank'); }, 700);
             } catch (error) {
                 window.open(googleReviewLink, '_blank');
                 card.style.display = 'none';
