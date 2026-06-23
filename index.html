@@ -6,7 +6,6 @@
     <title>SahilCodeLab | Client Reviews</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Favicon update for browser tab -->
     <link rel="icon" type="image/x-icon" href="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico">
     <style>
         :root {
@@ -22,7 +21,6 @@
             min-height: 100vh; 
         }
         
-        /* Sleek Card Design */
         .premium-card { 
             background-color: var(--card-dark); 
             border: 1px solid var(--border-dark); 
@@ -35,7 +33,6 @@
             box-shadow: 0 10px 30px -10px rgba(138, 221, 74, 0.15);
         }
 
-        /* High Contrast Brand Button */
         .btn-brand { 
             background-color: var(--brand-green); 
             color: #000000;
@@ -49,7 +46,6 @@
             transform: scale(0.98);
         }
 
-        /* Smooth Hide Animation */
         .hide-card { 
             opacity: 0; 
             transform: scale(0.95); 
@@ -61,7 +57,6 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* Loading Spinner */
         .loader {
             border: 3px solid var(--border-dark);
             border-top: 3px solid var(--brand-green);
@@ -74,42 +69,70 @@
 </head>
 <body class="flex flex-col items-center py-16 px-5 sm:px-8">
 
-    <!-- Brand Header -->
-    <div class="text-center mb-14 max-w-2xl w-full flex flex-col items-center">
-        <!-- Original Logo Integration -->
+    <div id="gender-screen" class="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-center p-5">
         <div class="flex items-center justify-center gap-3 mb-6">
-            <img src="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico" alt="SahilCodeLab Logo" class="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(138,221,74,0.4)]">
-            <span class="text-3xl font-bold tracking-tight">SahilCodeLab</span>
+            <img src="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico" alt="SahilCodeLab Logo" class="w-10 h-10 object-contain">
+            <span class="text-2xl font-bold tracking-tight">SahilCodeLab</span>
         </div>
-        
-        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
-            Code. Build. <span class="text-[#8add4a]">Review.</span>
-        </h1>
-        <p class="text-gray-400 text-sm md:text-base max-w-lg leading-relaxed">
-            Pick a template below. Clicking 'Copy' will automatically save the text and take you directly to Google to drop your rating!
-        </p>
+        <div class="premium-card p-8 max-w-md w-full text-center border border-[#262626]">
+            <h2 class="text-2xl font-extrabold mb-2">Welcome!</h2>
+            <p class="text-gray-400 text-sm mb-6">Please select your gender to load relevant review templates.</p>
+            
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button onclick="selectGender('male')" class="w-full py-4 rounded-xl border border-[#262626] bg-[#141414] font-semibold text-lg hover:border-[#8add4a] hover:text-[#8add4a] transition-all duration-200">
+                    ♂️ Male
+                </button>
+                <button onclick="selectGender('female')" class="w-full py-4 rounded-xl border border-[#262626] bg-[#141414] font-semibold text-lg hover:border-[#8add4a] hover:text-[#8add4a] transition-all duration-200">
+                    ♀️ Female
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- Status Messages -->
-    <div id="loading" class="flex flex-col items-center justify-center space-y-4 mb-8">
-        <div class="loader"></div>
-        <p class="text-[#8add4a] font-semibold tracking-wide text-sm animate-pulse">Initializing templates...</p>
-    </div>
+    <div id="main-content" class="w-full max-w-3xl flex flex-col items-center hidden">
+        <div class="text-center mb-14 max-w-2xl w-full flex flex-col items-center">
+            <div class="flex items-center justify-center gap-3 mb-6">
+                <img src="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico" alt="SahilCodeLab Logo" class="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(138,221,74,0.4)]">
+                <span class="text-3xl font-bold tracking-tight">SahilCodeLab</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
+                Code. Build. <span class="text-[#8add4a]">Review.</span>
+            </h1>
+            <p class="text-gray-400 text-sm md:text-base max-w-lg leading-relaxed">
+                Pick a template below. Clicking 'Copy' will automatically save the text and take you directly to Google to drop your rating!
+            </p>
+        </div>
 
-    <!-- Dynamic Reviews Container -->
-    <div id="reviews-container" class="w-full max-w-3xl space-y-4"></div>
+        <div id="loading" class="flex flex-col items-center justify-center space-y-4 mb-8">
+            <div class="loader"></div>
+            <p class="text-[#8add4a] font-semibold tracking-wide text-sm animate-pulse">Initializing templates...</p>
+        </div>
+
+        <div id="reviews-container" class="w-full space-y-4"></div>
+    </div>
 
     <script>
-        // Aapki Google Sheet API
+        // Aapki Google Sheet API URL yahan lagayein
         const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbyxB5LUGxnn2i7E4ElZUrEPkxu0CnkvdW02UXPXHn273QkcRgxFx0Ft-MmmFIGvmpUYQg/exec";
         const googleReviewLink = "https://www.google.com/search?q=sahilcodelab#lrd=0x21620bfdf86287bd:0xa6015bcc8e41aaea,3,,,,";
 
         const container = document.getElementById('reviews-container');
         const loading = document.getElementById('loading');
+        const genderScreen = document.getElementById('gender-screen');
+        const mainContent = document.getElementById('main-content');
 
-        async function fetchReviews() {
+        // Gender select hone par chalega
+        function selectGender(gender) {
+            genderScreen.classList.add('hidden'); // Gender screen chhupao
+            mainContent.classList.remove('hidden'); // Main content dikhao
+            fetchReviews(gender); // Chune hue gender ke sath fetch karo
+        }
+
+        async function fetchReviews(gender) {
             try {
-                const response = await fetch(GOOGLE_SHEET_API + "?action=getReviews");
+                // API me gender parameter bhej rahe hain
+                const response = await fetch(`${GOOGLE_SHEET_API}?action=getReviews&gender=${gender}`);
                 const reviews = await response.json();
                 
                 loading.style.display = 'none';
@@ -117,7 +140,7 @@
                 if (reviews.length === 0) {
                     container.innerHTML = `
                         <div class="text-center premium-card p-12 border border-[#262626]">
-                            <p class="text-gray-300 font-medium text-lg mb-2">All templates have been used! 🚀</p>
+                            <p class="text-gray-300 font-medium text-lg mb-2">All templates for this category have been used! 🚀</p>
                             <p class="text-sm text-gray-500">Thank you for helping SahilCodeLab grow.</p>
                         </div>`;
                     return;
@@ -164,7 +187,6 @@
                 executeCopy();
             }
 
-            // Button UX Update
             btn.innerHTML = `<svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...`;
             btn.classList.add("opacity-70", "cursor-wait");
             btn.disabled = true;
@@ -184,8 +206,6 @@
                 card.style.display = 'none';
             }
         }
-
-        window.onload = fetchReviews;
     </script>
 </body>
 </html>
