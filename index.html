@@ -69,6 +69,7 @@
 </head>
 <body class="flex flex-col items-center py-16 px-5 sm:px-8">
 
+    <!-- Gender Selection Screen -->
     <div id="gender-screen" class="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-center p-5">
         <div class="flex items-center justify-center gap-3 mb-6">
             <img src="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico" alt="SahilCodeLab Logo" class="w-10 h-10 object-contain">
@@ -89,7 +90,9 @@
         </div>
     </div>
 
+    <!-- Main Content (Hidden Initially) -->
     <div id="main-content" class="w-full max-w-3xl flex flex-col items-center hidden">
+        <!-- Brand Header -->
         <div class="text-center mb-14 max-w-2xl w-full flex flex-col items-center">
             <div class="flex items-center justify-center gap-3 mb-6">
                 <img src="https://sahilcodelab.vercel.app/sahilcodelab-brand.ico" alt="SahilCodeLab Logo" class="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(138,221,74,0.4)]">
@@ -104,16 +107,18 @@
             </p>
         </div>
 
+        <!-- Status Messages -->
         <div id="loading" class="flex flex-col items-center justify-center space-y-4 mb-8">
             <div class="loader"></div>
             <p class="text-[#8add4a] font-semibold tracking-wide text-sm animate-pulse">Initializing templates...</p>
         </div>
 
+        <!-- Dynamic Reviews Container -->
         <div id="reviews-container" class="w-full space-y-4"></div>
     </div>
 
     <script>
-        // Aapki Google Sheet API URL yahan lagayein
+        // Connected to your Google Apps Script URL
         const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbyxB5LUGxnn2i7E4ElZUrEPkxu0CnkvdW02UXPXHn273QkcRgxFx0Ft-MmmFIGvmpUYQg/exec";
         const googleReviewLink = "https://www.google.com/search?q=sahilcodelab#lrd=0x21620bfdf86287bd:0xa6015bcc8e41aaea,3,,,,";
 
@@ -122,16 +127,15 @@
         const genderScreen = document.getElementById('gender-screen');
         const mainContent = document.getElementById('main-content');
 
-        // Gender select hone par chalega
+        // Runs when user selects a gender
         function selectGender(gender) {
-            genderScreen.classList.add('hidden'); // Gender screen chhupao
-            mainContent.classList.remove('hidden'); // Main content dikhao
-            fetchReviews(gender); // Chune hue gender ke sath fetch karo
+            genderScreen.classList.add('hidden'); 
+            mainContent.classList.remove('hidden'); 
+            fetchReviews(gender); 
         }
 
         async function fetchReviews(gender) {
             try {
-                // API me gender parameter bhej rahe hain
                 const response = await fetch(`${GOOGLE_SHEET_API}?action=getReviews&gender=${gender}`);
                 const reviews = await response.json();
                 
